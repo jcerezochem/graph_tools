@@ -6,7 +6,7 @@ program remove_triling_zeroes
     implicit none
 
     character(len=200) :: line
-    real(8),dimension(10000) :: x, y
+    real(8),dimension(20000) :: x, y
     integer,dimension(10) :: zero_beg,zero_end
     logical :: zeroes_region, approx
     real(8) :: thr, ymax_abs
@@ -94,6 +94,8 @@ program remove_triling_zeroes
             zero_end(iz) = i
         endif
     enddo
+    ! If exit in a zero region, delete it
+    if (zeroes_region) zero_end(iz) = N
 !    print*, "Blocks of zeroes:"
 !    do i=1,iz
 !        print*, "Block", iz, zero_beg(i), "-", zero_end(i)
@@ -103,6 +105,7 @@ program remove_triling_zeroes
     new_range_beg=1
     new_range_end=N
     do i=1,iz
+        !write(0,*) "Region", iz, "from", zero_beg(i), "to", zero_end(i)
         if (zero_beg(i) == 1) then
             new_range_beg=zero_end(i)
         elseif (zero_end(i) == N) then
@@ -110,10 +113,11 @@ program remove_triling_zeroes
         endif
     enddo
 
-    do i=new_range_beg,new_range_end
+    ! Take same part of the zero region (+5)
+    do i=new_range_beg-5,new_range_end+5
         print*, x(i), y(i)
     enddo
-       
+
     stop
 
 end program remove_triling_zeroes
