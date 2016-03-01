@@ -1,17 +1,16 @@
 program average_plots
 
-    ! Shift the plot to set the minimum y to zero
-    ! Labels (#) are identified and kept
+    ! Avergage spectra with weights
 
     implicit none
 
-    character(len=200),dimension(100) :: filenames
-    real(8),dimension(100) :: y, x, w
+    character(len=200),dimension(100) :: filenames, filenames_bk
+    real(8),dimension(100) :: yy,y, x, w
     real(8) :: a
     !Counters
     integer :: i,j,k
-    integer :: ispc, iw
-    integer :: N
+    integer :: ispc, iw, ispc_tot
+    integer :: N, nadd
     !IO
     integer :: iostatus
     !Input selections stuff
@@ -19,7 +18,8 @@ program average_plots
                do_weight=.false.   
     character(len=50) :: arg
 
-
+    !Initialize
+    nadd=0
     !Read data
     ispc=0
     argument_retrieved=.false.
@@ -36,7 +36,7 @@ program average_plots
                 argument_retrieved=.true.
                 open(10,file=arg,status='old',iostat=iostatus)
                 if (iostatus /= 0) then
-                    print*, "ERROR: opening "//trim(adjustl(arg))
+                    write(0,*) "ERROR: opening "//trim(adjustl(arg))
                     stop
                 endif
                 iw=0
@@ -47,12 +47,20 @@ program average_plots
                     w(iw) = a
                 enddo
                 close(10)
+            case ("-add")
+                argument_retrieved=.true.
+                call getarg(i+1, arg)
+                read(arg,*) nadd
             case ("-h")
                 print*, "Program to average spectra"
                 print*, "All plots need to be defined in the same time grid."
                 print*, "Output spcetrum to stdout" 
                 print*, "Options"
-                print*, "  -weights    File with weights"
+                print*, "  -w      File with weights"
+                print*, "  -add    Number of additional points, which are"
+                print*, "          obtained by linear extrapolation. It is"
+                print*, "          assumed that the imput set is evenly spaced"
+                print*, "          Weights should include the intermediante points"
                 print*, ""
                 stop
             case default
@@ -60,7 +68,7 @@ program average_plots
                 filenames(ispc)=arg
                 open(10+ispc,file=filenames(ispc),status='old',iostat=iostatus)
                 if (iostatus /= 0) then
-                    print*, "ERROR: opening spectrum "//trim(adjustl(arg))
+                    write(0,*) "ERROR: opening spectrum "//trim(adjustl(arg))
                     stop
                 endif
         end select
@@ -78,8 +86,25 @@ program average_plots
         a = a + w(i)
     enddo 
 
-    if (iw /= ispc) then
-        print*, "ERROR: number of points is not the same as number of spectra"
+    ! Prepare for extrapolation
+    filenames_bk(1:ispc) = filenames(1:ispc)
+    k=0
+    do i=1,ispc-1
+        k=k+1
+        filenames(k) = filenames_bk(i)
+        do j=1,nadd
+            k=k+1
+            filenames(k) = "(Extrapolated)"
+        enddo
+    enddo
+    k=k+1
+    filenames(k) = filenames_bk(ispc)
+    ispc_tot=k
+
+    if (iw /= ispc_tot) then
+        write(0,*) "     Weights     Spectra"
+        write(0,*) iw, ispc_tot
+        write(0,*) "ERROR: number of weights is not the same as number of spectra + added points"
         stop
     else
         write(0,*) " Spectrum                        Weight    NormWeight"
@@ -91,20 +116,42 @@ program average_plots
     endif
 
     do
-        a = 0.d0
         do i=1,ispc
             read(10+i,*,iostat=iostatus) x(i), y(i)
             if (iostatus /= 0) stop
-            a = a + y(i)*w(i)
         enddo
+        ! Check that all x have the same value
         do i=2,ispc
             ! Check x-values (max dev 1%)
             if (abs(x(1)-x(i))/x(1) > 0.01) then
-                print*, "ERROR: the spectra have different scales"
-                print*, x(1), x(i), i
+                write(0,*) "ERROR: the spectra have different scales"
+                write(0,*) x(1), x(i), i
                 stop
             endif
         enddo 
+
+        ! Extrapolate points
+        k=0
+        do i=1,ispc-1
+            k=k+1
+            yy(k) = y(i)
+!write(100+k,*) x(1), yy(k)
+            do j=1,nadd
+                k=k+1
+                yy(k) = y(i) + (y(i+1)-y(i))*float(j)/float(nadd+1)
+!write(100+k,*) x(1), yy(k)
+            enddo
+        enddo
+        k=k+1
+        yy(k) = y(ispc)
+!write(100+k,*) x(1), yy(k)
+        
+        ! Compute the average
+        a = 0.d0
+        do i=1,ispc_tot
+            a = a + yy(i)*w(i)
+        enddo
+
         print*, x(1), a
     enddo
 
