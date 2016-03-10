@@ -40,6 +40,7 @@ program rebase_plot
                 print*, "the range with the flag: "
                 print*, "  -start <value>"
                 print*, "from <value> to <value>+360"
+                stop
             case default
                 write(0,*) "Unknown label ignored:", trim(adjustl(arg))
         end select
