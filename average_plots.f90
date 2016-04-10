@@ -16,7 +16,7 @@ program average_plots
     !Input selections stuff
     logical :: argument_retrieved, &
                do_weight=.false.   
-    character(len=50) :: arg
+    character(len=200) :: arg
 
     !Initialize
     nadd=0
