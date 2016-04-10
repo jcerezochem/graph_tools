@@ -18,6 +18,7 @@ program rebase_plot
     character(len=50) :: arg
     !other
     logical :: in_range
+    logical :: reorder=.true.
     
 
     start_range = -180.d0
@@ -33,13 +34,20 @@ program rebase_plot
                 call getarg(i+1, arg)
                 read(arg,*) start_range
                 argument_retrieved=.true.
+            case ("-noreorder")
+                reorder=.false.
+            case ("-reorder")
+                reorder=.true.
             case ("-h")
                 print*, "Program to modify the range to sort"
                 print*, "periodic data. Output is also ordered"
-                print*, "Input/output by standard chanels. Set "
-                print*, "the range with the flag: "
-                print*, "  -start <value>"
-                print*, "from <value> to <value>+360"
+                print*, "by default, but this can be avided."
+                print*, "Input/output by standard chanels. "
+                print*, "Flag options: "
+                print*, "  -start <value>  Set the initial for the periodic range:"
+                print*, "                  from <value> to <value>+360 [def:-180]"
+                print*, "  -[no]reorder    Whether or not the reorder data [def:reorder]"
+                print*, ""
                 stop
             case default
                 write(0,*) "Unknown label ignored:", trim(adjustl(arg))
@@ -81,18 +89,20 @@ program rebase_plot
     enddo
 
     ! Order
-    do i=1,N-1
-        do j=i+1,N
-            if (x(j)<x(i)) then
-                aux=x(i)
-                x(i) = x(j)
-                x(j) = aux
-                aux=y(i)
-                y(i) = y(j)
-                y(j) = aux
-            endif
+    if (reorder) then
+        do i=1,N-1
+            do j=i+1,N
+                if (x(j)<x(i)) then
+                    aux=x(i)
+                    x(i) = x(j)
+                    x(j) = aux
+                    aux=y(i)
+                    y(i) = y(j)
+                    y(j) = aux
+                endif
+            enddo
         enddo
-    enddo
+    endif
 
     ! Print
     do i=1,N
