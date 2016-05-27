@@ -19,6 +19,7 @@ program rebase_plot
     !other
     logical :: in_range
     logical :: reorder=.true.
+    logical :: onecol=.false.
     
 
     start_range = -180.d0
@@ -38,6 +39,10 @@ program rebase_plot
                 reorder=.false.
             case ("-reorder")
                 reorder=.true.
+            case ("-onecol")
+                onecol=.true.
+            case ("-noonecol")
+                onecol=.false.
             case ("-h")
                 print*, "Program to modify the range to sort"
                 print*, "periodic data. Output is also ordered"
@@ -47,6 +52,7 @@ program rebase_plot
                 print*, "  -start <value>  Set the initial for the periodic range:"
                 print*, "                  from <value> to <value>+360 [def:-180]"
                 print*, "  -[no]reorder    Whether or not the reorder data [def:reorder]"
+                print*, "  -[no]onecol     Expect only one column (x-range without y data)"
                 print*, ""
                 stop
             case default
@@ -63,9 +69,12 @@ program rebase_plot
              len_trim(line)  == 0 ) then
             cycle
         endif
-
         i=i+1
-        read(line,*) x(i), y(i)
+        if (onecol) then
+            read(line,*) x(i)
+        else
+            read(line,*) x(i), y(i)
+        endif
 
     enddo
     N = i
@@ -96,9 +105,11 @@ program rebase_plot
                     aux=x(i)
                     x(i) = x(j)
                     x(j) = aux
-                    aux=y(i)
-                    y(i) = y(j)
-                    y(j) = aux
+                    if (.not.onecol) then
+                        aux=y(i)
+                        y(i) = y(j)
+                        y(j) = aux
+                    endif
                 endif
             enddo
         enddo
@@ -106,7 +117,11 @@ program rebase_plot
 
     ! Print
     do i=1,N
-        print*, x(i), y(i)
+        if (onecol) then
+            print*, x(i)
+        else
+            print*, x(i), y(i)
+        endif
     enddo
 
 

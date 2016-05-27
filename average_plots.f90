@@ -113,7 +113,14 @@ program average_plots
             write(0,'(A30,2F10.2)') filenames(i), w(i), w(i)/a
             w(i) = w(i)/a
         enddo
+        write(0,*) "------------------------------------------------------"
     endif
+
+    a=0.d0
+    do i=1,iw
+        a=a+w(i)
+    enddo
+    write(0,'(X,A,F12.4)') "Sum of normalized weights = ", a
 
     do
         do i=1,ispc
@@ -135,16 +142,16 @@ program average_plots
         do i=1,ispc-1
             k=k+1
             yy(k) = y(i)
-!write(100+k,*) x(1), yy(k)
+write(100+k,*) x(1), yy(k)
             do j=1,nadd
                 k=k+1
                 yy(k) = y(i) + (y(i+1)-y(i))*float(j)/float(nadd+1)
-!write(100+k,*) x(1), yy(k)
+write(100+k,*) x(1), yy(k)
             enddo
         enddo
         k=k+1
         yy(k) = y(ispc)
-!write(100+k,*) x(1), yy(k)
+write(100+k,*) x(1), yy(k)
         
         ! Compute the average
         a = 0.d0
