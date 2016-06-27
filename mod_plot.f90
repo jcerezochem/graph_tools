@@ -175,6 +175,7 @@ program mod_plot
        do
            read(5,'(A)',iostat=IOS) line
            if (IOS /= 0) exit
+           if (len_trim(line) == 0) exit
            write(30,'(A)') line
            if (index(line,"%")==1) then
                cycle
@@ -198,6 +199,7 @@ program mod_plot
     do 
         read(unt,'(A)',iostat=IOstatus) line
         if (IOstatus /= 0) exit
+        if (len_trim(line) == 0) exit
         if (index(line,"%")==1) then
             if (comments) print'(A)', trim(adjustl(line))
             cycle
