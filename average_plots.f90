@@ -6,7 +6,7 @@ program average_plots
 
     character(len=200),dimension(100) :: filenames, filenames_bk
     real(8),dimension(100) :: yy,y, x, w
-    real(8) :: a
+    real(8) :: a, da, da0, factor
     !Counters
     integer :: i,j,k
     integer :: ispc, iw, ispc_tot
@@ -74,18 +74,6 @@ program average_plots
         end select
     enddo
 
-    if (.not.do_weight) then
-        do i=1,ispc
-            w(i) = 1.d0
-        enddo
-    endif
-
-    ! Normalize weights
-    a = 0.d0
-    do i=1,iw
-        a = a + w(i)
-    enddo 
-
     ! Prepare for extrapolation
     filenames_bk(1:ispc) = filenames(1:ispc)
     k=0
@@ -100,6 +88,20 @@ program average_plots
     k=k+1
     filenames(k) = filenames_bk(ispc)
     ispc_tot=k
+
+    if (.not.do_weight) then
+        iw=ispc_tot
+        do i=1,iw
+            w(i) = 1.d0
+        enddo
+    endif
+
+    ! Normalize weights
+    a = 0.d0
+    do i=1,iw
+        a = a + w(i)
+    enddo 
+
 
     if (iw /= ispc_tot) then
         write(0,*) "     Weights     Spectra"
@@ -155,11 +157,24 @@ write(100+k,*) x(1), yy(k)
         
         ! Compute the average
         a = 0.d0
+        factor = 0.d0
         do i=1,ispc_tot
             a = a + yy(i)*w(i)
         enddo
+        ! and stddev
+        factor = dfloat(ispc_tot - 1)/dfloat(ispc_tot)
+        da = 0.d0
+        do i=1,ispc_tot
+            da = da + (yy(i)-a)**2 *w(i)/factor
+        enddo
+        da = dsqrt(da)
+        !da0 = 0.d0
+        !do i=1,ispc_tot
+        !    da0 = da0 + (yy(i)-a)**2 
+        !enddo
+        !da0 = dsqrt(da0/float(ispc_tot-1))
 
-        print*, x(1), a
+        print*, x(1), a, da !, da0
     enddo
 
     stop
