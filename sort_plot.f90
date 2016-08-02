@@ -57,10 +57,12 @@ program sort_plot
     enddo
 
 
+    open(30,status='scratch')
     i = 0
     do 
         read(*,'(A)',iostat=iostatus) line
         if (iostatus /= 0) exit
+        write(30,'(A)') trim(adjustl(line))
         if ( INDEX(line,'#') == 1 .or. &
              len_trim(line)  == 0 ) then
             cycle
@@ -109,10 +111,10 @@ program sort_plot
     endif
 
     ! Print
-    rewind(5)
+    rewind(30)
     i=0
     do 
-        read(*,'(A)',iostat=iostatus) line
+        read(30,'(A)',iostat=iostatus) line
         if (iostatus /= 0) exit
         if ( INDEX(line,'#') == 1 .and. comments) then
             print*, trim(adjustl(line))
@@ -128,6 +130,7 @@ program sort_plot
             print*, x(i), y(i)
         endif
     enddo
+    close(30)
 
     !if (reverse) then
     !    do i=N,1,-1
