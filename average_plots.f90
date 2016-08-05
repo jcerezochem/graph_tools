@@ -19,6 +19,7 @@ program average_plots
     character(len=200) :: arg, line
     character(len=2)   :: spctype
     character(len=1)   :: cnull
+    logical :: print_extra=.true.
 
     !Initialize
     nadd=0
@@ -93,6 +94,7 @@ program average_plots
                 rewind(300+ispc)
         end select
     enddo
+    if (adjustl(spctype) == "y") print_extra=.false.
 
     ! Prepare for extrapolation
     filenames_bk(1:ispc) = filenames(1:ispc)
@@ -174,16 +176,16 @@ program average_plots
         do i=1,ispc-1
             k=k+1
             yy(k) = y(i)
-!write(100+k,*) x(1), yy(k)
+            if (print_extra) write(100+k,*) x(1), yy(k)
             do j=1,nadd
                 k=k+1
                 yy(k) = y(i) + (y(i+1)-y(i))*float(j)/float(nadd+1)
-!write(100+k,*) x(1), yy(k)
+            if (print_extra) write(100+k,*) x(1), yy(k)
             enddo
         enddo
         k=k+1
         yy(k) = y(ispc)
-!write(100+k,*) x(1), yy(k)
+        if (print_extra) write(100+k,*) x(1), yy(k)
         
         ! Compute the average
         a = 0.d0
