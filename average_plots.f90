@@ -4,8 +4,10 @@ program average_plots
 
     implicit none
 
-    character(len=200),dimension(100) :: filenames, filenames_bk
-    real(8),dimension(100) :: yy,y, x, w
+    integer,parameter :: MAX_DIM=300
+
+    character(len=200),dimension(MAX_DIM) :: filenames, filenames_bk
+    real(8),dimension(MAX_DIM) :: yy,y, x, w
     real(8) :: a, da, da0, factor
     !Counters
     integer :: i,j,k, ii
