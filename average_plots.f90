@@ -4,7 +4,7 @@ program average_plots
 
     implicit none
 
-    integer,parameter :: MAX_DIM=300
+    integer,parameter :: MAX_DIM=500
 
     character(len=200),dimension(MAX_DIM) :: filenames, filenames_bk
     real(8),dimension(MAX_DIM) :: yy,y, x, w
@@ -21,7 +21,7 @@ program average_plots
     character(len=200) :: arg, line
     character(len=2)   :: spctype
     character(len=1)   :: cnull
-    logical :: print_extra=.true.
+    logical :: print_extra=.false.
 
     !Initialize
     nadd=0
@@ -84,16 +84,16 @@ program average_plots
                     stop
                 endif
                 ! Preprocess the file to get rid out of comment lines
-                open(300+ispc,status="scratch")
+                open(1300+ispc,status="scratch")
                 do
                     read(10+ispc,'(A)',iostat=iostatus) line
                     if (iostatus/=0) exit
                     call split_line(line,"#",line,cnull) 
                     if ( len_trim(line) == 0 ) cycle
-                    write(300+ispc,'(A)') trim(adjustl(line))
+                    write(1300+ispc,'(A)') trim(adjustl(line))
                 enddo
                 close(10+ispc)
-                rewind(300+ispc)
+                rewind(1300+ispc)
         end select
     enddo
     if (adjustl(spctype) == "y") print_extra=.false.
@@ -153,9 +153,9 @@ program average_plots
     do
         do i=1,ispc
             if (adjustl(spctype) == "y") then
-                read(300+i,*,iostat=iostatus) y(i)
+                read(1300+i,*,iostat=iostatus) y(i)
             else
-                read(300+i,*,iostat=iostatus) x(i), y(i)
+                read(1300+i,*,iostat=iostatus) x(i), y(i)
             endif
             if (iostatus /= 0) then
                 call close_scr_files(ispc)
@@ -260,7 +260,7 @@ program average_plots
         integer :: i
 
         do i=1,n
-            close(300+i)
+            close(1300+i)
         enddo
 
         return
