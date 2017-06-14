@@ -6,8 +6,10 @@ program rebase_plot
     implicit none
 
     character(len=200) :: line
-    real(8),dimension(1000) :: x, y
+    real(8),dimension(1000) :: x
+    character(len=200),dimension(1000) :: y
     real(8) :: start_range, aux
+    character(len=200) :: caux
     !Counters
     integer :: i,j,k
     integer :: N
@@ -73,9 +75,11 @@ program rebase_plot
         if (onecol) then
             read(line,*) x(i)
         else
-            read(line,*) x(i), y(i)
+            line=adjustl(line)
+            read(line,*) x(i)
+            read(line,*) caux
+            call split_line(line,trim(adjustl(caux)),caux,y(i))
         endif
-
     enddo
     N = i
 
@@ -106,9 +110,9 @@ program rebase_plot
                     x(i) = x(j)
                     x(j) = aux
                     if (.not.onecol) then
-                        aux=y(i)
+                        caux=y(i)
                         y(i) = y(j)
-                        y(j) = aux
+                        y(j) = caux
                     endif
                 endif
             enddo
@@ -120,12 +124,44 @@ program rebase_plot
         if (onecol) then
             print*, x(i)
         else
-            print*, x(i), y(i)
+            print*, x(i), trim(y(i))
         endif
     enddo
 
 
     stop
+
+    contains
+
+    subroutine split_line(line,splitter,line_a,line_b)
+
+        !Split a line from a given marker. If it is not present, it does not
+        !split the line (the whole is preserved in line_a
+
+        character(len=*),intent(in):: line,splitter
+        character(len=*),intent(out):: line_a,line_b
+
+        !local
+        integer :: i,j
+        !Auxiliar helps when line(input) is also one 
+        !of the outputs, line_a or line_b
+        character(len=(len(line_a))) :: aux_line_a
+
+        i=INDEX(line,splitter)
+        if ( i == 0 ) then
+            line_a=line
+            line_b=""
+            return
+        endif
+        j=len_trim(splitter)
+        
+        aux_line_a=line(1:i-1)
+        line_b=line(i+j:)
+        line_a=aux_line_a
+
+        return
+
+    end subroutine split_line
 
 end program rebase_plot
 
