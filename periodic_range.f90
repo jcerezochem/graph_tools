@@ -7,6 +7,7 @@ program rebase_plot
 
     character(len=200) :: line
     real(8),dimension(1000) :: x
+    integer,dimension(10)   :: edge_index
     character(len=200),dimension(1000) :: y
     real(8) :: start_range, aux
     character(len=200) :: caux
@@ -84,6 +85,7 @@ program rebase_plot
     N = i
 
     ! Place in range
+    k=0
     do i=1,N
 
         in_range = .false.
@@ -98,7 +100,21 @@ program rebase_plot
             if (x(i) >= start_range .and. x(i) <= start_range+360.d0) in_range=.true.
 
         enddo
+        ! Detect edge points
+        if ( x(i) == start_range .or. x(i) == start_range+360.d0 ) then
+            k=k+1
+            edge_index(k)=i
+        endif
 
+    enddo
+    ! Fix edges to get them properly when repeated
+    do i=1,k,2
+        j=edge_index(i)
+        x(j)=start_range
+    enddo
+    do i=2,k,2
+        j=edge_index(i)
+        x(j)=start_range+360.d0
     enddo
 
     ! Order
