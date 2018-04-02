@@ -7,7 +7,7 @@ program mod_plot
     implicit double precision (A-H,O-Z)
     implicit integer (I-N)
 
-    character(len=100) :: line, line2
+    character(len=200) :: line, line2
     integer :: unt
     !Input selections stuff
     logical :: argument_retrieved, &
