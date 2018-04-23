@@ -3,8 +3,8 @@ program histo_real
     real,dimension(1:10000) :: intBin
     real :: intens, Norm
     logical :: correct_LS=.false., &
-               weight=.true.,      &
-               centers=.false.
+               weight=.true., &
+               explicit_plot=.false.
 
     !Read labels stuff
     logical :: argument_retrieved
@@ -35,10 +35,11 @@ program histo_real
                 !This option skip weigting every value with the intensity (setting all to one)
                 weight=.false.
                 write(0,*) "No weights will be applied"
-            case ("-centers")
-                !This option skip weigting every value with the intensity (setting all to one)
-                centers=.true.
-                write(0,*) "No explicit bars, only centers will be printed"
+            case ("-explicit")
+                !This option corrects intensities for LS (abs)
+                explicit_plot=.true.
+                write(0,*) "Histogram will be written explicitily to file"
+
 
             case default
                 write(0,*) "Unknown label ignored:", trim(adjustl(arg))
@@ -51,7 +52,6 @@ program histo_real
     n=0
     do
 
-        
         read(5,*,iostat=ios) freq
         if (ios /= 0) exit
         n=n+1   
@@ -62,10 +62,15 @@ program histo_real
     write(0,*) "N data read: ", n
     !Enlarge limits 1%
     write(0,*) "Data from ", freqi, " to ", freqf
-    delta_tot=freqf-freqi
-    delta_enlarge = (delta_tot*1.01-delta_tot)/2.d0
-    freqi=freqi-delta_enlarge
-    freqf=freqf+delta_enlarge
+    if (freqi == freqf) then
+        freqi=freqi-delta_freq/2.01d0
+        freqf=freqf+delta_freq/2.01d0
+    else
+        delta_tot=freqf-freqi
+        delta_enlarge = (delta_tot*1.01-delta_tot)/2.d0
+        freqi=freqi-delta_enlarge
+        freqf=freqf+delta_enlarge
+    endif
 
 !    freqi=3.145
 !    freqf=3.655
@@ -77,18 +82,25 @@ program histo_real
     Nbins = int(aint((freqf-freqi)/delta_freq)) + 1 
     write(0,*) "Will use", Nbins, " bins"
 
-    !Reset the bounds
-    range_freq = delta_freq*float(Nbins-1)
-    residual = (range_freq - (freqf-freqi))/2.
-    freqi = freqi - residual
-    freqf = freqf + residual
-    write(0,*) "With range: ", freqi, " to ", freqf, "(", freqf-freqi, ")"
-
-    binwdth  = (freqf - freqi)/float(Nbins-1)
+    if (Nbins>1) then
+        !Reset the bounds
+        range_freq = delta_freq*float(Nbins-1)
+        residual = (range_freq - (freqf-freqi))/2.
+        freqi = freqi - residual
+        freqf = freqf + residual
+        write(0,*) "With range: ", freqi, " to ", freqf, "(", freqf-freqi, ")"
+        binwdth  = (freqf - freqi)/float(Nbins-1)
+        !Define bin range to center the bins over the input values
+        Bini = freqi - binwdth/2.d0
+        Binf = freqf + binwdth/2.d0
+    else
+        binwdth = delta_freq
+        write(0,'(X,A,f8.3)') "Only one bin, centered at ", 0.5d0*(freqi+freqf)
+        !Define bin range to center the bins over the input values
+        Bini = 0.5d0*(freqi+freqf) - binwdth/2.d0
+        Binf = 0.5d0*(freqi+freqf) + binwdth/2.d0
+    endif
     write(0,'(X,A,f8.3)') "Actual bin width: ", binwdth
-    !Define bin range to center the bins over the input values
-    bini = freqi - binwdth/2.d0
-    binf = freqf + binwdth/2.d0
 
 
     !Filling bins
@@ -96,19 +108,20 @@ program histo_real
     rewind(5)
     do
 
-    read(5,*,iostat=ios) freq, intens
-    if (ios /= 0) exit
+        !Tune the weighting behaviour
+        if (.not.weight) then
+            read(5,*,iostat=ios) freq
+            if (ios /= 0) exit
+            intens=1.
+        elseif (correct_LS) then
+            read(5,*,iostat=ios) freq, intens
+            if (ios /= 0) exit
+            intens=intens/freq
+        endif
 
-    !Tune the weighting behaviour
-    if (.not.weight) then
-        intens=1.
-    elseif (correct_LS) then
-        intens=intens/freq
-    endif
 
-    ibin = ((freq-bini)/(binf-bini)) * Nbins + 1
-    
-    intBin(ibin) = intBin(ibin) + intens
+        ibin = ((freq-bini)/(binf-bini)) * Nbins + 1
+        intBin(ibin) = intBin(ibin) + intens
 
     enddo
 
@@ -120,8 +133,8 @@ program histo_real
     enddo
 
 
-    if (.not.centers) then
-        !Print the histogram (explicitely)
+    !Print the histogram (explicitely)
+    if (explicit_plot) then
         do i=1,Nbins
             freq = freqi + dfloat(i-1)*binwdth
             print*, freq-binwdth/2, 0.d0
@@ -130,14 +143,10 @@ program histo_real
             print*, freq+binwdth/2, 0.d0
         enddo
     else
-        !Print the histogram (only bin centers)
-        freq=freqi
-        print*, freq-binwdth/2, 0.d0
         do i=1,Nbins
             freq = freqi + dfloat(i-1)*binwdth
             print*, freq, intBin(i)/Norm
         enddo
-        print*, freq+binwdth/2, intBin(i)/Norm
     endif
 
 

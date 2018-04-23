@@ -47,7 +47,6 @@ program histo_real
     n=0
     do
 
-        
         read(5,*,iostat=ios) freq
         if (ios /= 0) exit
         n=n+1   
@@ -104,19 +103,20 @@ program histo_real
     rewind(5)
     do
 
-    read(5,*,iostat=ios) freq, intens
-    if (ios /= 0) exit
+        !Tune the weighting behaviour
+        if (.not.weight) then
+            read(5,*,iostat=ios) freq
+            if (ios /= 0) exit
+            intens=1.
+        elseif (correct_LS) then
+            read(5,*,iostat=ios) freq, intens
+            if (ios /= 0) exit
+            intens=intens/freq
+        endif
 
-    !Tune the weighting behaviour
-    if (.not.weight) then
-        intens=1.
-    elseif (correct_LS) then
-        intens=intens/freq
-    endif
 
-    ibin = ((freq-bini)/(binf-bini)) * Nbins + 1
-    
-    intBin(ibin) = intBin(ibin) + intens
+        ibin = ((freq-bini)/(binf-bini)) * Nbins + 1
+        intBin(ibin) = intBin(ibin) + intens
 
     enddo
 
