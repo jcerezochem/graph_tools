@@ -58,10 +58,15 @@ program histo_real
     write(0,*) "N data read: ", n
     !Enlarge limits 1%
     write(0,*) "Data from ", freqi, " to ", freqf
-    delta_tot=freqf-freqi
-    delta_enlarge = (delta_tot*1.01-delta_tot)/2.d0
-    freqi=freqi-delta_enlarge
-    freqf=freqf+delta_enlarge
+    if (freqi == freqf) then
+        freqi=freqi-delta_freq/2.01d0
+        freqf=freqf+delta_freq/2.01d0
+    else
+        delta_tot=freqf-freqi
+        delta_enlarge = (delta_tot*1.01-delta_tot)/2.d0
+        freqi=freqi-delta_enlarge
+        freqf=freqf+delta_enlarge
+    endif
 
 !    freqi=3.145
 !    freqf=3.655
@@ -73,18 +78,25 @@ program histo_real
     Nbins = int(aint((freqf-freqi)/delta_freq)) + 1 
     write(0,*) "Will use", Nbins, " bins"
 
-    !Reset the bounds
-    range_freq = delta_freq*float(Nbins-1)
-    residual = (range_freq - (freqf-freqi))/2.
-    freqi = freqi - residual
-    freqf = freqf + residual
-    write(0,*) "With range: ", freqi, " to ", freqf, "(", freqf-freqi, ")"
-
-    binwdth  = (freqf - freqi)/float(Nbins-1)
+    if (Nbins>1) then
+        !Reset the bounds
+        range_freq = delta_freq*float(Nbins-1)
+        residual = (range_freq - (freqf-freqi))/2.
+        freqi = freqi - residual
+        freqf = freqf + residual
+        write(0,*) "With range: ", freqi, " to ", freqf, "(", freqf-freqi, ")"
+        binwdth  = (freqf - freqi)/float(Nbins-1)
+        !Define bin range to center the bins over the input values
+        Bini = freqi - binwdth/2.d0
+        Binf = freqf + binwdth/2.d0
+    else
+        binwdth = delta_freq
+        write(0,'(X,A,f8.3)') "Only one bin, centered at ", 0.5d0*(freqi+freqf)
+        !Define bin range to center the bins over the input values
+        Bini = 0.5d0*(freqi+freqf) - binwdth/2.d0
+        Binf = 0.5d0*(freqi+freqf) + binwdth/2.d0
+    endif
     write(0,'(X,A,f8.3)') "Actual bin width: ", binwdth
-    !Define bin range to center the bins over the input values
-    bini = freqi - binwdth/2.d0
-    binf = freqf + binwdth/2.d0
 
 
     !Filling bins
