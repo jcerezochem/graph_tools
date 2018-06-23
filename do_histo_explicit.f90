@@ -112,6 +112,9 @@ program histo_real
             read(5,*,iostat=ios) freq, intens
             if (ios /= 0) exit
             intens=intens/freq
+        else
+            read(5,*,iostat=ios) freq, intens
+            if (ios /= 0) exit
         endif
 
 

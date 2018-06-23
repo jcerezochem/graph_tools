@@ -36,7 +36,7 @@ program histo_real
                 weight=.false.
                 write(0,*) "No weights will be applied"
             case ("-explicit")
-                !This option corrects intensities for LS (abs)
+                !This option makes this tool equivalent to do_histo_explicit
                 explicit_plot=.true.
                 write(0,*) "Histogram will be written explicitily to file"
 
@@ -117,6 +117,9 @@ program histo_real
             read(5,*,iostat=ios) freq, intens
             if (ios /= 0) exit
             intens=intens/freq
+        else
+            read(5,*,iostat=ios) freq, intens
+            if (ios /= 0) exit
         endif
 
 
