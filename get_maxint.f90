@@ -1,15 +1,18 @@
 program get_maxint
 
     character(len=100) :: line
-    real :: Int, MaxInt, E, IntPrev, MaxInt0
+    real :: Int, MaxInt, E, IntPrev, MaxInt0, Xmax
     integer :: unt, IOS
-    logical :: get_first_max
+    logical :: get_first_max, getx
     integer :: npoints
-    real,dimension(:),allocatable :: y
+    real,dimension(:),allocatable :: x,y
     !Input selections stuff
     logical :: argument_retrieved
     character(len=50) :: arg
 
+    ! Initializa vars
+    get_first_max=.false.
+    getx = .false.
 
     do i=1,iargc()
         if (argument_retrieved) then
@@ -20,11 +23,14 @@ program get_maxint
         select case (adjustl(arg))
             case ("-first")
                 get_first_max=.true.
+            case ("-getx")
+                getx=.true.
             case ("-h")
                 print*, "Program to retrive the maximum from a plot"
                 print*, "Input/output by standard chanels. "
                 print*, "Flag options: "
                 print*, "  -first           Get the first max encountered"
+                print*, "  -getx            Report x-value corresponding to max"
                 print*, ""
                 stop
             case default
@@ -61,13 +67,16 @@ program get_maxint
         endif
         npoints=npoints+1
         read(line,*) E, Int
-        if (Int > MaxInt) MaxInt=Int
+        if (Int > MaxInt) then
+            MaxInt=Int
+            Xmax=E
+        endif
     enddo
 
     ! New option: get the first max
     if (get_first_max) then
         rewind(unt)
-        allocate(y(npoints))
+        allocate(y(npoints),x(npoints))
         i=0
         do 
             read(unt,'(A)',iostat=IOS) line
@@ -78,10 +87,11 @@ program get_maxint
                 cycle
             endif
             i=i+1
-            read(line,*) E, y(i)
+            read(line,*) x(i), y(i)
         enddo
         close(unt)
-        ! Compute max of the running average
+        ! Compute max of the running average 
+        ! (to reduce numerical errors due to noise)
         MaxInt0=MaxInt
         MaxInt=-9999.
         IntPrev=-9999.
@@ -103,11 +113,18 @@ program get_maxint
         ! in the region from the run av max
         MaxInt=-9999.
         do i=ii_max-10,ii_max+10
-            if (y(i) > MaxInt) MaxInt=y(i)
+            if (y(i) > MaxInt) then
+                MaxInt=y(i)
+                Xmax=x(i)
+            endif
         enddo
     endif
     
-    print*, MaxInt
+    if (getx) then
+        print*, Xmax
+    else
+        print*, MaxInt
+    endif
     
     stop
     
