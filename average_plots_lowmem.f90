@@ -20,7 +20,7 @@ program average_plots
     logical :: argument_retrieved, &
                do_weight=.false.   
     character(len=200)   :: arg
-    character(len=20000) :: line
+    character(len=200000):: line
     character(len=2)     :: spctype
     character(len=1)     :: cnull
     logical :: print_extra=.false.
