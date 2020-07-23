@@ -154,8 +154,9 @@ program do_stdv
 
     write(0,*) "    M1(eV)     M2(eV²)    sigma(eV)"
     write(0,"(3F11.4)") m1,m2,dsqrt(m2-m1**2)
-    
 
+    write(0,'(/,A,F10.4)') "Corresponding HWHM(eV) = ", stdv*dsqrt(2.d0*dlog(2.d0))
+    write(0,*) ""
 
     stop
 

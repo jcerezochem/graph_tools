@@ -3,8 +3,8 @@ program hist2min
     ! Get the global min fromt histieresis cycle
     ! obtain with mm_scan.sh -histieresis
 
-    character(len=200) :: line
-    real(8),dimension(200) :: angle, E, angle_unique, E_unique
+    character(len=600) :: line
+    real(8),dimension(600) :: angle, E, angle_unique, E_unique
     logical :: is_done
 
     i = 0
