@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import numpy as np
@@ -22,14 +22,14 @@ for arg in sys.argv[1:]:
         filesin.append(arg)
 
 if do_help:
-    print """
+    print("""
 
    Program to sum spectra with arbitrary x-axis ranges
 ----------------------------------------------------------
 
 Usage:
 %s <inputplots> -o sum.dat
-"""%(sys.argv[0])
+"""%(sys.argv[0]))
 
     sys.exit()
 
@@ -40,7 +40,7 @@ xmax=-100.
 xmin=9999999.
 dx=99999.
 for filein in filesin:
-    print 'Input plot: '+filein
+    print('Input plot: '+filein)
     try:
         data=np.loadtxt(filein)
     except:
@@ -54,7 +54,7 @@ for filein in filesin:
     d=(xs[-1][-1]-xs[-1][0])/len(xs[-1])
     dx = min(d,dx)
 
-print 'Range:', xmin,xmax, ' with dx=', dx
+print('Range:', xmin,xmax, ' with dx=', dx)
 
 # Get new common grid (x)
 xnew = np.arange(xmin,xmax,dx)
@@ -70,8 +70,8 @@ for x,y in zip(xs,ys):
 # Print sum
 with open(fileout,'w') as f:
     for xi,yi in zip(xnew,ynew):
-        print >>f, xi, yi
+        print(xi, yi, file=f)
 
-print 'Sum written to '+fileout
+print('Sum written to '+fileout)
 
 
