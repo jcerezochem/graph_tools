@@ -101,21 +101,34 @@ program rebase_plot
 
         enddo
         ! Detect edge points
-        if ( x(i) == start_range .or. x(i) == start_range+360.d0 ) then
-            k=k+1
-            edge_index(k)=i
+        if (.not.onecol) then
+            if ( x(i) == start_range .or. x(i) == start_range+360.d0 ) then
+                k=k+1
+                edge_index(k)=i
+            endif
         endif
 
     enddo
     ! Fix edges to get them properly when repeated
-    do i=1,k,2
-        j=edge_index(i)
-        x(j)=start_range
-    enddo
-    do i=2,k,2
-        j=edge_index(i)
-        x(j)=start_range+360.d0
-    enddo
+    if (.not.onecol) then
+        do i=1,k,2
+            j=edge_index(i)
+            x(j)=start_range
+        enddo
+        do i=2,k,2
+            j=edge_index(i)
+            x(j)=start_range+360.d0
+        enddo
+        ! If there is a repetition, that means that last edge point is not there
+        do i=2,N
+        do j=1,i-1
+            if (x(j) == x(i)) then
+                x(j) = start_range+360.d0
+                y(j) = y(edge_index(1))
+            endif
+        enddo
+        enddo
+    endif
 
     ! Order
     if (reorder) then
