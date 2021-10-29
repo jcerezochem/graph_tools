@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 DESCRIPTION
 -----------
@@ -21,12 +21,8 @@ v0              : First stable version: fcc_analyzer
 
 NOTES AND BUGS
 ---------------
-* Tested on Python 2.7.5+ (from ubuntu repo). Will not work on python3 
-  Required packages:
-   - numpy (tested with version: 1.9.1)
-   - matplotlib (tested with version: 1.4.2)
+* Needs python3 
    
-* When expoerting to xmgrace, you might need to 
 """
 import numpy as np
 from scipy import interpolate
@@ -347,6 +343,10 @@ def convolute(spc_stick,npoints=1000,hwhm=0.1,broad="Gau",input_bins=False):
     """
     x = spc_stick[0]
     y = spc_stick[1]
+    # Order data
+    idx =  x.argsort()
+    x = x[idx]
+    y = y[idx]
    
     # ------------------------------------------------------------------------
     # Convert discrete sticks into a continuous function with an histogram
