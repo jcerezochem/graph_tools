@@ -73,7 +73,7 @@ for filein in filesin:
 print('Range:', xmin,xmax, ' with dx=', dx)
 
 # Get new common grid (x)
-xnew = np.arange(xmin,xmax,dx)
+xnew = np.arange(xmin,xmax+dx,dx)
 ynew = np.zeros(len(xnew))
 
 # Now sum all data over such grid after interpolation
