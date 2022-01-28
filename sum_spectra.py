@@ -67,7 +67,7 @@ for filein in filesin:
 
     xmax=max(xmax,xs[-1].max())
     xmin=min(xmin,xs[-1].min())
-    d=(xs[-1][-1]-xs[-1][0])/len(xs[-1])
+    d=(xs[-1][-1]-xs[-1][0])/(len(xs[-1])-1)
     dx = min(d,dx)
 
 print('Range:', xmin,xmax, ' with dx=', dx)
