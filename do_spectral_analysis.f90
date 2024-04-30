@@ -115,6 +115,7 @@ program do_vib_analysis
 !    df=freq(3)-freq(2)
     !Compute area
 !    area=rint(1)+rint(n)
+    area = 0.d0
     do i=1,n-1
         area = area + (rint(i)+rint(i+1))*(freq(i+1)-freq(i))/2.d0
     enddo
@@ -129,6 +130,7 @@ program do_vib_analysis
         rintX(i) = rint(i)*freq(i)
     enddo
     ! integrate
+    RM1 = 0.d0
     do i=1,n-1
        RM1 = RM1 + (rintX(i)+rintX(i+1))*(freq(i+1)-freq(i))/2.d0
     enddo
